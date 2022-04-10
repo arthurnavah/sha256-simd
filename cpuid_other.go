@@ -20,7 +20,7 @@ import (
 	"io/ioutil"
 	"runtime"
 
-	"github.com/klauspost/cpuid/v2"
+	"github.com/arthurnavah/cpuid/v2"
 )
 
 func hasArmSha2() bool {
@@ -42,5 +42,4 @@ func hasArmSha2() bool {
 		return false
 	}
 	return bytes.Contains(cpuInfo, []byte(sha256Feature))
-
 }

@@ -1,5 +1,5 @@
-module github.com/minio/sha256-simd
+module github.com/arthurnavah/sha256-simd
 
-go 1.13
+go 1.18
 
-require github.com/klauspost/cpuid/v2 v2.0.6
+require github.com/arthurnavah/cpuid/v2 v2.0.14

@@ -1,15 +1,16 @@
 # sha256-simd
+## This repository is a Fork of the [github.com/minio/sha256-simd](https://github.com/minio/sha256-simd) project by user [minio](https://github.com/minio)
 
-Accelerate SHA256 computations in pure Go using AVX512, SHA Extensions for x86 and ARM64 for ARM. 
+Accelerate SHA256 computations in pure Go using AVX512, SHA Extensions for x86 and ARM64 for ARM.
 On AVX512 it provides an up to 8x improvement (over 3 GB/s per core).
 SHA Extensions give a performance boost of close to 4x over native.
 
 ## Introduction
 
-This package is designed as a replacement for `crypto/sha256`. 
+This package is designed as a replacement for `crypto/sha256`.
 For ARM CPUs with the Cryptography Extensions, advantage is taken of the SHA2 instructions resulting in a massive performance improvement.
 
-This package uses Golang assembly. 
+This package uses Golang assembly.
 The AVX512 version is based on the Intel's "multi-buffer crypto library for IPSec" whereas the other Intel implementations are described in "Fast SHA-256 Implementations on Intel Architecture Processors" by J. Guilford et al.
 
 ## Support for Intel SHA Extensions
@@ -45,7 +46,7 @@ Whereas the original Intel C implementation requires some sort of explicit sched
 Due to this different way of scheduling, we decided to use an explicit method to instantiate the AVX512 version. Essentially one or more AVX512 processing servers ([`Avx512Server`](https://github.com/minio/sha256-simd/blob/master/sha256blockAvx512_amd64.go#L294)) have to be created whereby each server can hash over 3 GB/s on a single core. An `hash.Hash` object ([`Avx512Digest`](https://github.com/minio/sha256-simd/blob/master/sha256blockAvx512_amd64.go#L45)) is then instantiated using one of these servers and used in the regular fashion:
 
 ```go
-import "github.com/minio/sha256-simd"
+import "github.com/arthurnavah/sha256-simd"
 
 func main() {
 	server := sha256.NewAvx512Server()
@@ -64,11 +65,11 @@ More detailed information can be found in this [blog](https://blog.minio.io/acce
 
 ## Drop-In Replacement
 
-The following code snippet shows how you can use `github.com/minio/sha256-simd`. 
+The following code snippet shows how you can use `github.com/arthurnavah/sha256-simd`.
 This will automatically select the fastest method for the architecture on which it will be executed.
 
 ```go
-import "github.com/minio/sha256-simd"
+import "github.com/arthurnavah/sha256-simd"
 
 func main() {
         ...

@@ -1,4 +1,5 @@
-//+build !noasm,!appengine,gc
+//go:build !noasm && !appengine && gc
+// +build !noasm,!appengine,gc
 
 /*
  * Minio Cloud Storage, (C) 2017 Minio, Inc.
@@ -69,7 +70,6 @@ func (d *Avx512Digest) Reset() {
 
 // Write to digest
 func (d *Avx512Digest) Write(p []byte) (nn int, err error) {
-
 	if d.final {
 		return 0, errors.New("Avx512Digest already finalized. Reset first before writing again")
 	}
@@ -98,7 +98,6 @@ func (d *Avx512Digest) Write(p []byte) (nn int, err error) {
 
 // Sum - Return sha256 sum in bytes
 func (d *Avx512Digest) Sum(in []byte) (result []byte) {
-
 	if d.final {
 		return append(in, d.result[:]...)
 	}
@@ -259,11 +258,11 @@ var table = [512]uint64{
 	0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7,
 	0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7, 0xbef9a3f7bef9a3f7,
 	0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2,
-	0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2}
+	0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2, 0xc67178f2c67178f2,
+}
 
 // Interface function to assembly ode
 func blockAvx512(digests *[512]byte, input [16][]byte, mask []uint64) [16][Size]byte {
-
 	scratch := [512]byte{}
 	sha256X16Avx512(digests, &scratch, &table, mask, input)
 
@@ -332,7 +331,7 @@ func (a512srv *Avx512Server) Process() {
 			// fmt.Println("Adding message:", block.uid, index)
 
 			if a512srv.lanes[index].block != nil { // If slot is already filled, process all inputs
-				//fmt.Println("Invoking Blocks()")
+				// fmt.Println("Invoking Blocks()")
 				a512srv.blocks()
 			}
 			a512srv.totalIn++
@@ -360,7 +359,6 @@ func (a512srv *Avx512Server) Process() {
 
 // Do a reset for this calculation
 func (a512srv *Avx512Server) reset(uid uint64) {
-
 	// Check if there is a message still waiting to be processed (and remove if so)
 	for i, lane := range a512srv.lanes {
 		if lane.uid == uid {
@@ -377,7 +375,6 @@ func (a512srv *Avx512Server) reset(uid uint64) {
 
 // Invoke assembly and send results back
 func (a512srv *Avx512Server) blocks() {
-
 	inputs := [16][]byte{}
 	for i := range inputs {
 		inputs[i] = a512srv.lanes[i].block
@@ -458,7 +455,6 @@ type maskRounds struct {
 }
 
 func genMask(input [16][]byte) [16]maskRounds {
-
 	// Sort on blocks length small to large
 	var sorted [16]lane
 	for c, inpt := range input {

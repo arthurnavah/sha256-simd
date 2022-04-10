@@ -22,7 +22,7 @@ import (
 	"hash"
 	"runtime"
 
-	"github.com/klauspost/cpuid/v2"
+	"github.com/arthurnavah/cpuid/v2"
 )
 
 // Size - The size of a SHA256 checksum in bytes.

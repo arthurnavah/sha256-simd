@@ -189,4 +189,3 @@ DATA ·constants+0xf0(SB)/8, $0xa4506ceb90befffa
 DATA ·constants+0xf8(SB)/8, $0xc67178f2bef9a3f7
 
 GLOBL ·constants(SB), 8, $256
-

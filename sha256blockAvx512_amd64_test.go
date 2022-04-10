@@ -1,4 +1,5 @@
-//+build !noasm,!appengine,gc
+//go:build !noasm && !appengine && gc
+// +build !noasm,!appengine,gc
 
 /*
  * Minio Cloud Storage, (C) 2017 Minio, Inc.
@@ -30,7 +31,6 @@ import (
 )
 
 func TestGoldenAVX512(t *testing.T) {
-
 	if !avx512 {
 		t.SkipNow()
 		return
@@ -74,7 +74,6 @@ func initDigests() *[512]byte {
 }
 
 func testSha256Avx512(t *testing.T, offset, padding int) [16][]byte {
-
 	if !avx512 {
 		t.SkipNow()
 		return [16][]byte{}
@@ -117,7 +116,6 @@ func TestAvx512_1Block(t *testing.T)  { testSha256Avx512(t, 31, 0) }
 func TestAvx512_3Blocks(t *testing.T) { testSha256Avx512(t, 47, 55) }
 
 func TestAvx512_MixedBlocks(t *testing.T) {
-
 	if !avx512 {
 		t.SkipNow()
 		return
@@ -152,7 +150,6 @@ func TestAvx512_MixedBlocks(t *testing.T) {
 }
 
 func TestAvx512_MixedWithNilBlocks(t *testing.T) {
-
 	if !avx512 {
 		t.SkipNow()
 		return
@@ -178,10 +175,12 @@ func TestAvx512_MixedWithNilBlocks(t *testing.T) {
 	var offset int
 	for i := 0; i < len(output); i++ {
 		if i%3 == 2 { // for nil inputs
-			initvec := [32]byte{0x6a, 0x09, 0xe6, 0x67, 0xbb, 0x67, 0xae, 0x85,
+			initvec := [32]byte{
+				0x6a, 0x09, 0xe6, 0x67, 0xbb, 0x67, 0xae, 0x85,
 				0x3c, 0x6e, 0xf3, 0x72, 0xa5, 0x4f, 0xf5, 0x3a,
 				0x51, 0x0e, 0x52, 0x7f, 0x9b, 0x05, 0x68, 0x8c,
-				0x1f, 0x83, 0xd9, 0xab, 0x5b, 0xe0, 0xcd, 0x19}
+				0x1f, 0x83, 0xd9, 0xab, 0x5b, 0xe0, 0xcd, 0x19,
+			}
 			if bytes.Compare(output[i][:], initvec[:]) != 0 {
 				t.Fatalf("Sum256 function: sha256 for nil vector = %s want %s", hex.EncodeToString(output[i][:]), hex.EncodeToString(initvec[:]))
 			}
@@ -199,7 +198,6 @@ func TestAvx512_MixedWithNilBlocks(t *testing.T) {
 }
 
 func TestAvx512Server(t *testing.T) {
-
 	if !avx512 {
 		t.SkipNow()
 		return
@@ -250,7 +248,6 @@ func TestAvx512Server(t *testing.T) {
 }
 
 func TestAvx512Digest(t *testing.T) {
-
 	if !avx512 {
 		t.SkipNow()
 		return
@@ -284,7 +281,6 @@ func TestAvx512Digest(t *testing.T) {
 }
 
 func benchmarkAvx512SingleCore(h512 []hash.Hash, body []byte) {
-
 	for i := 0; i < len(h512); i++ {
 		h512[i].Write(body)
 	}
@@ -294,7 +290,6 @@ func benchmarkAvx512SingleCore(h512 []hash.Hash, body []byte) {
 }
 
 func benchmarkAvx512(b *testing.B, size int) {
-
 	if !avx512 {
 		b.SkipNow()
 		return
@@ -324,7 +319,6 @@ func BenchmarkAvx512_5M(b *testing.B)  { benchmarkAvx512(b, 5*1024*1024) }
 func BenchmarkAvx512_10M(b *testing.B) { benchmarkAvx512(b, 10*1024*1024) }
 
 func benchmarkAvx512MultiCore(b *testing.B, size, cores int) {
-
 	if !avx512 {
 		b.SkipNow()
 		return
@@ -380,18 +374,90 @@ var goldenMask = []maskTest{
 	//  >= 64   0110=6          1011=b          1101=d           0110=6
 	//  >=128   0100=4          0010=2          1001=9           0100=4
 	{[16]int{0, 64, 128, 0, 64, 128, 0, 64, 128, 0, 64, 128, 0, 64, 128, 0}, [16]maskRounds{{0x6db6, 1}, {0x4924, 1}}},
-	{[16]int{1 * 64, 2 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64, 8 * 64, 9 * 64, 10 * 64, 11 * 64, 12 * 64, 13 * 64, 14 * 64, 15 * 64, 16 * 64},
-		[16]maskRounds{{0xffff, 1}, {0xfffe, 1}, {0xfffc, 1}, {0xfff8, 1}, {0xfff0, 1}, {0xffe0, 1}, {0xffc0, 1}, {0xff80, 1},
-			{0xff00, 1}, {0xfe00, 1}, {0xfc00, 1}, {0xf800, 1}, {0xf000, 1}, {0xe000, 1}, {0xc000, 1}, {0x8000, 1}}},
-	{[16]int{2 * 64, 1 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64, 8 * 64, 9 * 64, 10 * 64, 11 * 64, 12 * 64, 13 * 64, 14 * 64, 15 * 64, 16 * 64},
-		[16]maskRounds{{0xffff, 1}, {0xfffd, 1}, {0xfffc, 1}, {0xfff8, 1}, {0xfff0, 1}, {0xffe0, 1}, {0xffc0, 1}, {0xff80, 1},
-			{0xff00, 1}, {0xfe00, 1}, {0xfc00, 1}, {0xf800, 1}, {0xf000, 1}, {0xe000, 1}, {0xc000, 1}, {0x8000, 1}}},
-	{[16]int{10 * 64, 20 * 64, 30 * 64, 40 * 64, 50 * 64, 60 * 64, 70 * 64, 80 * 64, 90 * 64, 100 * 64, 110 * 64, 120 * 64, 130 * 64, 140 * 64, 150 * 64, 160 * 64},
-		[16]maskRounds{{0xffff, 10}, {0xfffe, 10}, {0xfffc, 10}, {0xfff8, 10}, {0xfff0, 10}, {0xffe0, 10}, {0xffc0, 10}, {0xff80, 10},
-			{0xff00, 10}, {0xfe00, 10}, {0xfc00, 10}, {0xf800, 10}, {0xf000, 10}, {0xe000, 10}, {0xc000, 10}, {0x8000, 10}}},
-	{[16]int{10 * 64, 19 * 64, 27 * 64, 34 * 64, 40 * 64, 45 * 64, 49 * 64, 52 * 64, 54 * 64, 55 * 64, 57 * 64, 60 * 64, 64 * 64, 69 * 64, 75 * 64, 82 * 64},
-		[16]maskRounds{{0xffff, 10}, {0xfffe, 9}, {0xfffc, 8}, {0xfff8, 7}, {0xfff0, 6}, {0xffe0, 5}, {0xffc0, 4}, {0xff80, 3},
-			{0xff00, 2}, {0xfe00, 1}, {0xfc00, 2}, {0xf800, 3}, {0xf000, 4}, {0xe000, 5}, {0xc000, 6}, {0x8000, 7}}},
+	{
+		[16]int{1 * 64, 2 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64, 8 * 64, 9 * 64, 10 * 64, 11 * 64, 12 * 64, 13 * 64, 14 * 64, 15 * 64, 16 * 64},
+		[16]maskRounds{
+			{0xffff, 1},
+			{0xfffe, 1},
+			{0xfffc, 1},
+			{0xfff8, 1},
+			{0xfff0, 1},
+			{0xffe0, 1},
+			{0xffc0, 1},
+			{0xff80, 1},
+			{0xff00, 1},
+			{0xfe00, 1},
+			{0xfc00, 1},
+			{0xf800, 1},
+			{0xf000, 1},
+			{0xe000, 1},
+			{0xc000, 1},
+			{0x8000, 1},
+		},
+	},
+	{
+		[16]int{2 * 64, 1 * 64, 3 * 64, 4 * 64, 5 * 64, 6 * 64, 7 * 64, 8 * 64, 9 * 64, 10 * 64, 11 * 64, 12 * 64, 13 * 64, 14 * 64, 15 * 64, 16 * 64},
+		[16]maskRounds{
+			{0xffff, 1},
+			{0xfffd, 1},
+			{0xfffc, 1},
+			{0xfff8, 1},
+			{0xfff0, 1},
+			{0xffe0, 1},
+			{0xffc0, 1},
+			{0xff80, 1},
+			{0xff00, 1},
+			{0xfe00, 1},
+			{0xfc00, 1},
+			{0xf800, 1},
+			{0xf000, 1},
+			{0xe000, 1},
+			{0xc000, 1},
+			{0x8000, 1},
+		},
+	},
+	{
+		[16]int{10 * 64, 20 * 64, 30 * 64, 40 * 64, 50 * 64, 60 * 64, 70 * 64, 80 * 64, 90 * 64, 100 * 64, 110 * 64, 120 * 64, 130 * 64, 140 * 64, 150 * 64, 160 * 64},
+		[16]maskRounds{
+			{0xffff, 10},
+			{0xfffe, 10},
+			{0xfffc, 10},
+			{0xfff8, 10},
+			{0xfff0, 10},
+			{0xffe0, 10},
+			{0xffc0, 10},
+			{0xff80, 10},
+			{0xff00, 10},
+			{0xfe00, 10},
+			{0xfc00, 10},
+			{0xf800, 10},
+			{0xf000, 10},
+			{0xe000, 10},
+			{0xc000, 10},
+			{0x8000, 10},
+		},
+	},
+	{
+		[16]int{10 * 64, 19 * 64, 27 * 64, 34 * 64, 40 * 64, 45 * 64, 49 * 64, 52 * 64, 54 * 64, 55 * 64, 57 * 64, 60 * 64, 64 * 64, 69 * 64, 75 * 64, 82 * 64},
+		[16]maskRounds{
+			{0xffff, 10},
+			{0xfffe, 9},
+			{0xfffc, 8},
+			{0xfff8, 7},
+			{0xfff0, 6},
+			{0xffe0, 5},
+			{0xffc0, 4},
+			{0xff80, 3},
+			{0xff00, 2},
+			{0xfe00, 1},
+			{0xfc00, 2},
+			{0xf800, 3},
+			{0xf000, 4},
+			{0xe000, 5},
+			{0xc000, 6},
+			{0x8000, 7},
+		},
+	},
 }
 
 func TestMaskGen(t *testing.T) {

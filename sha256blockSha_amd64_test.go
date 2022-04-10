@@ -1,4 +1,5 @@
-//+build !noasm,!appengine,gc
+//go:build !noasm && !appengine && gc
+// +build !noasm,!appengine,gc
 
 package sha256
 
@@ -56,7 +57,7 @@ func sha256hash(m []byte) (r [32]byte) {
 }
 
 func runTestSha(hashfunc func([]byte) [32]byte) bool {
-	var m = []byte("This is a message. This is a message. This is a message. This is a message.")
+	m := []byte("This is a message. This is a message. This is a message. This is a message.")
 
 	ar := hashfunc(m)
 	br := sha256.Sum256(m)
